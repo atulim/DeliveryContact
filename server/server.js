@@ -7,7 +7,7 @@ const publicPath = path.join(__dirname,'../public');
 const socketIO = require('socket.io');
 //console.log(__dirname + '/../public');
 //console.log(publicPath);
-const {generateMessage} =require('./utility/message');
+const {generateMessage, generateLocMessage} =require('./utility/message');
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
@@ -24,12 +24,16 @@ io.on('connection',(socket) =>{
 
  //});
  socket.broadcast.emit('newMessage', generateMessage('Hello', 'New User'));
-socket.on('createMsg',(message) =>{
+socket.on('createMsg',(message, callback) =>{
   console.log('createMsg', message);
 
-   io.emit('newMessage', generateMessage(message.from, message.text));
-
+ io.emit('newMessage', generateMessage(message.from, message.text));
+   callback('Message received');
   });
+
+  socket.on('locMsg', (coords) => {
+    io.emit('newLocMessage', generateLocMessage('Admin',coords.latitude,coords.longitude));
+  })
 
 
   socket.on('disconnect', () => {
