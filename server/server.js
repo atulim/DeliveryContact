@@ -9,9 +9,11 @@ const socketIO = require('socket.io');
 //console.log(publicPath);
 const {generateMessage, generateLocMessage} =require('./utility/message');
 const {isRealString} = require('./utility/validation');
+const {Users} = require('./utility/userinfo');
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
+var users = new Users();
 app.use(express.static(publicPath));
 
 io.on('connection',(socket) =>{
@@ -26,8 +28,11 @@ io.on('connection',(socket) =>{
  //});
  socket.on('join', (params,callback) => {
   if(!isRealString(params.part1) || !isRealString(params.part2))
-  callback('UniqueID and OrderNo are not available');
+  return callback('UniqueID and OrderNo are not available');
    socket.join(params.part2);
+   users.removeUser(socket.id);
+   users.addUser(socket.id, params.part1, params.part2);
+   io.to(params.part2).emit('updateUserList', users.getUserList(params.part2));
    socket.emit('newMessage', generateMessage('Delivery Portal', 'Hello! Whats the issue?'));
    socket.broadcast.to(params.part2).emit('newMessage', generateMessage('Delivery Portal', `Hello! ${params.part1} has joined.`));
     callback();
@@ -46,7 +51,12 @@ socket.on('createMsg',(message, callback) =>{
 
 
   socket.on('disconnect', () => {
-    console.log("Disconnected from client");
+    var user = users.removeUser(socket.id);
+    if(user)
+    {
+      io.to(user.room).emit('updateUserList',users.getUserList(user.room));
+      io.to(user.room).emit('newMessage',generateMessage('Delivery Portal',`${user.name} has left`));
+    }
 });
 });
 //app.get('/',(req,res) => {
