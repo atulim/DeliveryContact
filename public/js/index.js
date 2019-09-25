@@ -1,4 +1,5 @@
 var socket = io();
+
 socket.on('connect',function(){
   console.log("Connected to server");
   //socket.emit('createMsg',{
@@ -11,20 +12,37 @@ socket.on('disconnect', function() {
 });
 
 socket.on('newMessage',function(message){
-  
-  console.log('newMessage',message);
-  var li = jQuery('<li></li>');
-  li.text(`${message.from} : ${message.text}`);
-  jQuery('#messages').append(li);
+  var fT = moment().format('h:mm a, MMM/DD/YYYY');
+  var template = jQuery('#message-template').html();
+  var html = Mustache.render(template,{
+    text:message.text,
+    from:message.from,
+    createdAt:fT
+  });
+
+  jQuery('#messages').append(html);
+  //console.log('newMessage',message);
+  //var li = jQuery('<li></li>');
+  //li.text(`${message.from} : ${message.text}`);
+  //jQuery('#messages').append(li);
 });
 
 socket.on('newLocMessage',function(message){
-    var li = jQuery('<li></li>');
-    var anchor = jQuery('<a target="_blank">My house location</a>');
-    li.text(`${message.from}: `);
-    anchor.attr('href',message.url);
-    li.append(anchor);
-    jQuery('#messages').append(li);
+  var fT = moment().format('h:mm a, MMM/DD/YYYY');
+  var template = jQuery('#location-message-template').html();
+  var html = Mustache.render(template,{
+   from:message.from,
+    url:message.url,
+    createdAt:fT
+  });
+    jQuery('#messages').append(html);
+
+  //  var li = jQuery('<li></li>');
+  //  var anchor = jQuery('<a target="_blank">My house location</a>');
+  //  li.text(`${message.from}: `);
+  //  anchor.attr('href',message.url);
+  //  li.append(anchor);
+  //  jQuery('#messages').append(li);
 });
 
 //socket.emit('createMsg', {

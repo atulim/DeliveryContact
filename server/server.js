@@ -32,7 +32,7 @@ socket.on('createMsg',(message, callback) =>{
   });
 
   socket.on('locMsg', (coords) => {
-    io.emit('newLocMessage', generateLocMessage('Admin',coords.latitude,coords.longitude));
+    io.emit('newLocMessage', generateLocMessage('User',coords.latitude,coords.longitude));
   })
 
 
