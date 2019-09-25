@@ -16,7 +16,7 @@ app.use(express.static(publicPath));
 
 io.on('connection',(socket) =>{
   console.log('Hello! New User');
-  socket.emit('newMessage', generateMessage('Hello', 'Whats the issue?'));
+
 
  //socket.emit('newMsg',{
 //   from:"Atul",
@@ -27,10 +27,12 @@ io.on('connection',(socket) =>{
  socket.on('join', (params,callback) => {
   if(!isRealString(params.part1) || !isRealString(params.part2))
   callback('UniqueID and OrderNo are not available');
-   callback();
-
+   socket.join(params.part2);
+   socket.emit('newMessage', generateMessage('Delivery Portal', 'Hello! Whats the issue?'));
+   socket.broadcast.to(params.part2).emit('newMessage', generateMessage('Delivery Portal', `Hello! ${params.part1} has joined.`));
+    callback();
  });
- socket.broadcast.emit('newMessage', generateMessage('Delivery Portal', 'Hello! New User'));
+
 socket.on('createMsg',(message, callback) =>{
   console.log('createMsg', message);
 
